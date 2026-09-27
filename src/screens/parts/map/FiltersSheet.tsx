@@ -36,7 +36,7 @@ export function FiltersSheet({ open, onClose, filters, onChange, matchCount, ens
 
   return (
     <Sheet open={open} onClose={onClose} title="Filters">
-      <div className="flex flex-col gap-6" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 20px)' }}>
+      <div className="flex min-w-0 flex-col gap-6 overflow-x-hidden" style={{ paddingBottom: 'calc(env(safe-area-inset-bottom) + 20px)' }}>
         <Group title="Show">
           <FilterPill active={filters.showOpen} onClick={() => onChange({ ...filters, showOpen: !filters.showOpen })}>
             To clean
@@ -61,7 +61,7 @@ export function FiltersSheet({ open, onClose, filters, onChange, matchCount, ens
           <Button variant="secondary" onClick={() => onChange(DEFAULT_FILTERS)} disabled={activeFilterCount(filters) === 0}>
             Reset
           </Button>
-          <Button full onClick={onClose} data-autofocus>
+          <Button className="min-w-0 flex-1" onClick={onClose} data-autofocus>
             {matchCount === 0 ? 'No spots match' : `Show ${plural(matchCount, 'spot')}`}
           </Button>
         </div>
@@ -70,8 +70,8 @@ export function FiltersSheet({ open, onClose, filters, onChange, matchCount, ens
   );
 }
 
-/** Distance pills share one row evenly (five of them must fit at 360 px). */
-const ROW_PILL = 'min-w-0 flex-1 justify-center gap-1 px-0! text-[13px]';
+/** Distance pills keep their natural width; the row scrolls sideways on narrow screens. */
+const ROW_PILL = 'min-w-[64px] justify-center';
 
 function Group({ title, note, row, children }: { title: string; note?: string; row?: boolean; children: ReactNode }) {
   return (
@@ -80,7 +80,13 @@ function Group({ title, note, row, children }: { title: string; note?: string; r
         <h3 className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">{title}</h3>
         {note && <span className="text-xs font-medium text-brand">{note}</span>}
       </div>
-      <div className={row ? 'flex gap-1.5' : 'flex flex-wrap gap-2'}>{children}</div>
+      {row ? (
+        <div className="flex gap-2 overflow-x-auto overscroll-x-contain pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+          {children}
+        </div>
+      ) : (
+        <div className="flex flex-wrap gap-2">{children}</div>
+      )}
     </section>
   );
 }

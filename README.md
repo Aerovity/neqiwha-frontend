@@ -19,7 +19,7 @@ This repository is the **mobile-first web app**. The API lives in [neqiwha-backe
 - **Leaderboard** with a podium, plus a personal **history** feed.
 - **Admin panel** (`/admin`, admins only): close, reopen or delete spots, manage admins and view the action log.
 - Passwordless **email login** with a 6-digit code.
-- **Animated splash** on every page load (the leaf fills in, then fades into the app), and a floating icon-only **navigation bar** with a central "Spot a mess" button.
+- **Animated splash** on every page load (the leaf outline draws itself, fills with a glow, then dissolves into the app), and a floating **"liquid glass" navigation bar**: frosted glass with a lens that glides and stretches between tabs (with real refraction in Chromium browsers), around a central "Spot a mess" button.
 
 ## Stack
 
@@ -50,7 +50,7 @@ src/
   shared/             types, ranks and shop catalogue — frozen contract, identical to neqiwha-backend/shared/
   styles/theme.css    brand tokens
 public/brand/         logo mark, map pin, rank insignia, map marker and navbar (brand/nav) SVGs
-public/splash/        loading animation frames and wide-screen backdrop (WebP)
+public/splash/        splash backgrounds (portrait + wide-screen, WebP); the leaf itself is an animated SVG
 ```
 
 > `src/shared/` must stay identical to the backend's `shared/` folder, so don't edit it on one side only.
