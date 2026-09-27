@@ -4,7 +4,7 @@
 
 This repository is the **mobile-first web app**. The API lives in [neqiwha-backend](https://github.com/Aerovity/neqiwha-backend).
 
-**Live app:** https://neqiwha-frontend-production.up.railway.app
+**Live app:** https://naqiwha.tech/
 
 ---
 
