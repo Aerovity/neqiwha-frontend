@@ -18,7 +18,7 @@ export async function compressImage(file: Blob, maxDim = 1600, quality = 0.8): P
   }
 }
 
-/** DEV_TOOLS sample photo from the backend (test-assets). */
+/** Sample photo (DEV_TOOLS or DEMO_SAMPLES) from the backend (test-assets). */
 export async function fetchSample(name: string): Promise<Blob> {
   const res = await fetch(`/api/dev/sample/${name}`);
   if (!res.ok) throw new Error('Sample photo unavailable.');

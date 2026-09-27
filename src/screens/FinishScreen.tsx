@@ -160,7 +160,7 @@ export function FinishScreen() {
             onPhoto={onPhoto}
             title="Show the cleaned spot"
             hint="Same angle as the before photo works best."
-            samples={config.devTools ? AFTER_SAMPLES : undefined}
+            samples={config.samplePhotos ? AFTER_SAMPLES : undefined}
             busy={preparing}
           />
         </section>

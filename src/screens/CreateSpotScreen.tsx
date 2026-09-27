@@ -234,7 +234,7 @@ export function CreateSpotScreen() {
                   onPhoto={onPhoto}
                   title="Take a photo of the mess"
                   hint="Get the whole mess in the frame."
-                  samples={config.devTools ? BEFORE_SAMPLES : undefined}
+                  samples={config.samplePhotos ? BEFORE_SAMPLES : undefined}
                   busy={preparing}
                 />
               </>
