@@ -1,9 +1,9 @@
 import { Navigate, Route, Routes } from 'react-router';
 import { APIProvider } from '@vis.gl/react-google-maps';
-import { useConfig } from './lib/queries';
+import { useConfig, useMe } from './lib/queries';
 import { useHistoryTrail } from './lib/history';
 import { AppFrame } from './components/AppFrame';
-import { Splash } from './components/Splash';
+import { LoadingSplash } from './components/LoadingSplash';
 import { FatalError } from './components/FatalError';
 import { RequireUser } from './components/RequireUser';
 import { RewardCelebration } from './components/RewardCelebration';
@@ -29,36 +29,45 @@ import { AdminScreen } from './screens/AdminScreen';
 export function App() {
   useHistoryTrail();
   const config = useConfig();
-  if (config.isPending) return <Splash />;
-  if (config.isError) return <FatalError onRetry={() => config.refetch()} />;
+  const me = useMe();
+  // The boot splash stays up until config and the session are known, so protected routes don't flash a loader.
+  // It is always rendered at the same spot in the tree so the animation never restarts.
+  const ready = !config.isPending && !me.isPending;
   return (
-    <APIProvider apiKey={config.data.mapsApiKey}>
-      <AppFrame>
-        <Routes>
-          <Route path="/" element={<MapScreen />} />
-          <Route path="/login" element={<LoginScreen />} />
-          <Route path="/login/code" element={<CodeScreen />} />
-          <Route path="/ranks" element={<RanksScreen />} />
-          <Route path="/leaderboard" element={<LeaderboardScreen />} />
-          <Route path="/spots/:id" element={<SpotScreen />} />
-          {config.data.devTools && <Route path="/kit" element={<KitScreen />} />}
-          <Route element={<RequireUser />}>
-            <Route path="/onboarding" element={<OnboardingScreen />} />
-            <Route path="/spots/new" element={<CreateSpotScreen />} />
-            <Route path="/spots/:id/checkin" element={<CheckinScreen />} />
-            <Route path="/spots/:id/finish" element={<FinishScreen />} />
-            <Route path="/me/qr" element={<MyQrScreen />} />
-            <Route path="/profile" element={<ProfileScreen />} />
-            <Route path="/history" element={<HistoryScreen />} />
-            <Route path="/shop" element={<ShopScreen />} />
-            <Route path="/wallet" element={<WalletScreen />} />
-            <Route path="/wallet/:id" element={<VoucherScreen />} />
-            <Route path="/admin" element={<AdminScreen />} />
-          </Route>
-          <Route path="*" element={<Navigate to="/" replace />} />
-        </Routes>
-        <RewardCelebration />
-      </AppFrame>
-    </APIProvider>
+    <>
+      {config.isError ? (
+        <FatalError onRetry={() => config.refetch()} />
+      ) : config.isSuccess ? (
+        <APIProvider apiKey={config.data.mapsApiKey}>
+          <AppFrame>
+            <Routes>
+              <Route path="/" element={<MapScreen />} />
+              <Route path="/login" element={<LoginScreen />} />
+              <Route path="/login/code" element={<CodeScreen />} />
+              <Route path="/ranks" element={<RanksScreen />} />
+              <Route path="/leaderboard" element={<LeaderboardScreen />} />
+              <Route path="/spots/:id" element={<SpotScreen />} />
+              {config.data.devTools && <Route path="/kit" element={<KitScreen />} />}
+              <Route element={<RequireUser />}>
+                <Route path="/onboarding" element={<OnboardingScreen />} />
+                <Route path="/spots/new" element={<CreateSpotScreen />} />
+                <Route path="/spots/:id/checkin" element={<CheckinScreen />} />
+                <Route path="/spots/:id/finish" element={<FinishScreen />} />
+                <Route path="/me/qr" element={<MyQrScreen />} />
+                <Route path="/profile" element={<ProfileScreen />} />
+                <Route path="/history" element={<HistoryScreen />} />
+                <Route path="/shop" element={<ShopScreen />} />
+                <Route path="/wallet" element={<WalletScreen />} />
+                <Route path="/wallet/:id" element={<VoucherScreen />} />
+                <Route path="/admin" element={<AdminScreen />} />
+              </Route>
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </Routes>
+            <RewardCelebration />
+          </AppFrame>
+        </APIProvider>
+      ) : null}
+      <LoadingSplash ready={ready} />
+    </>
   );
 }

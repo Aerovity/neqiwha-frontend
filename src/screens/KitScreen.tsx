@@ -250,7 +250,7 @@ export function KitScreen() {
       </Section>
 
       {/* 02 Ranks */}
-      <Section title="Ranks" note="Insignia at 64/28/20; frames in a 160% box at 28/40/64/112. Khadra frame animates (static under reduced motion).">
+      <Section title="Ranks" note="Insignia at 64/28/20; frames in a 160% box at 28/40/64/112. Diamond frame animates (static under reduced motion).">
         <Demo label="RankBadge" className="grid grid-cols-5 gap-2">
           {LEVELS.map(l => (
             <div key={l} className="flex flex-col items-center gap-2">
@@ -656,7 +656,7 @@ export function KitScreen() {
       </Section>
 
       {/* 15 Rank cards */}
-      <Section title="Rank cards" note="Viewer at 240 XP (Civilisé), then a Khadra viewer, then logged out.">
+      <Section title="Rank cards" note="Viewer at 240 XP (Silver), then a Diamond viewer, then logged out.">
         {LEVELS.map(l => (
           <RankCard key={l} level={l} xp={240} />
         ))}

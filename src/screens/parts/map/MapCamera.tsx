@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { useMap } from '@vis.gl/react-google-maps';
+import { useMap, useMapsLibrary } from '@vis.gl/react-google-maps';
 import type { LatLng } from '../../../lib/geo';
 
 export interface CameraTarget {
@@ -31,5 +31,29 @@ export function RevealPin({ pos }: { pos: LatLng | null }) {
     const north = b.getNorthEast().lat();
     if (pos.lat < south + (north - south) * 0.45) map.panTo(pos);
   }, [map, pos]);
+  return null;
+}
+
+/** Draws the distance filter around the user and zooms the map to fit it. */
+export function RadiusCircle({ center, radiusKm }: { center: LatLng | null; radiusKm: number | null }) {
+  const map = useMap();
+  const maps = useMapsLibrary('maps');
+  useEffect(() => {
+    if (!map || !maps || !center || radiusKm == null) return;
+    const circle = new maps.Circle({
+      map,
+      center,
+      radius: radiusKm * 1000,
+      clickable: false,
+      strokeColor: '#00652D',
+      strokeOpacity: 0.7,
+      strokeWeight: 2,
+      fillColor: '#00CF5C',
+      fillOpacity: 0.08,
+    });
+    const bounds = circle.getBounds();
+    if (bounds) map.fitBounds(bounds, { top: 90, bottom: 200, left: 16, right: 16 });
+    return () => circle.setMap(null);
+  }, [map, maps, center?.lat, center?.lng, radiusKm]);
   return null;
 }

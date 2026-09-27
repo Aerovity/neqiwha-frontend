@@ -23,7 +23,8 @@ export function FilterChips({ showOpen, showCleaned, onChange, className }: Filt
   );
 }
 
-function Pill({ active, onClick, children }: { active: boolean; onClick: () => void; children: ReactNode }) {
+/** Toggle pill used by the map filters. */
+export function Pill({ active, onClick, children, className }: { active: boolean; onClick: () => void; children: ReactNode; className?: string }) {
   return (
     <button
       type="button"
@@ -31,6 +32,7 @@ function Pill({ active, onClick, children }: { active: boolean; onClick: () => v
       onClick={onClick}
       className={clsx(
         'flex h-10 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-pill px-4 text-sm transition-[transform,background-color,color] duration-150 active:scale-[.97]',
+        className,
         active
           ? 'bg-ink font-semibold text-white shadow-[0_4px_12px_rgba(4,20,13,0.18)]'
           : 'bg-surface font-medium text-ink shadow-[0_4px_12px_rgba(4,20,13,0.12)]',

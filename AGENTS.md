@@ -17,8 +17,9 @@ SVGs in `public/brand/`. There are no full screen mockups: design screens from t
 - Mobile first: design for 390x844, check 360 px width. The app column is max 480px wide.
 - Test login (DEV_TOOLS=true, local only; production runs with DEV_TOOLS=false): any email ending `@naqiwha.test`, code `424242`.
 - Fonts: Changa (display, numbers, `font-display`) and Readex Pro (body, `font-sans`).
-- Colour meaning: spot states are red = not cleaned yet (trash bin), yellow = cleaning now (clock), green = cleaned (logo mark);
+- Colour meaning: spot states are red = not cleaned yet, yellow = cleaning now, green = cleaned (status chips). Map markers
+  use the art in `public/brand/markers/` (red trash bin, green broom, dark green leaf);
   gold = money or legend; red otherwise only for destructive actions and refusals.
-- Voice: "Yallah!", "Saha! Spot cleaned.", "Mabrouk! You're now Super Dz". Errors are plain English, no "sorry", no Darija.
+- Voice: "Yallah!", "Saha! Spot cleaned.", "Mabrouk! You're now Platinum". Errors are plain English, no "sorry", no Darija.
 - Every mutation shows a toast (`sonner`); buttons show loading and are disabled while pending.
 - Tap targets ≥ 44px, `min-h-dvh`, safe-area padding, `prefers-reduced-motion` respected.

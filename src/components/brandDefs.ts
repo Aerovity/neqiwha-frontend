@@ -59,7 +59,7 @@ export const BRAND_DEFS = [
   `<g id="nq-fr3"><g fill="none" stroke-width="6" stroke-linecap="round"><path d="M-1 36 L-25 24" stroke="#006233"/><path d="M-4 49 L-24 43" stroke="#2E9E4F"/><path d="M-2 62 L-17 60" stroke="#2E9E4F"/><path d="M101 36 L125 24" stroke="#006233"/><path d="M104 49 L124 43" stroke="#2E9E4F"/><path d="M102 62 L117 60" stroke="#2E9E4F"/></g><circle cx="50" cy="50" r="53.5" fill="none" stroke="#006233" stroke-width="7"/><polygon points="${STAR_POINTS}" fill="#D21034" stroke="#fff" stroke-width="1.5" stroke-linejoin="round" transform="translate(50 -4) scale(1.3)"/></g>`,
   `<g id="nq-fr4">${fr4Glow(true)}${fr4Ring(true)}</g>`,
   `<g id="nq-fr4-static">${fr4Glow(false)}${fr4Ring(false)}</g>`,
-  // Khadra split so Avatar can put the glow behind the disc
+  // Diamond split so Avatar can put the glow behind the disc
   `<g id="nq-fr4-glow">${fr4Glow(true)}</g>`,
   `<g id="nq-fr4-glow-static">${fr4Glow(false)}</g>`,
   `<g id="nq-fr4-ring">${fr4Ring(true)}</g>`,

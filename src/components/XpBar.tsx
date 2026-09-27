@@ -9,7 +9,7 @@ export interface XpBarProps {
   className?: string;
 }
 
-/** "240 / 400 XP to Nqi w 3lih lklam" + green bar; at max rank a full gold bar "Legend — max rank reached". */
+/** "240 / 400 XP to Gold" + green bar; at max rank a full gold bar "Legend — max rank reached". */
 export function XpBar({ xp, compact, className }: XpBarProps) {
   const { next, pct } = rankProgress(xp);
   return (

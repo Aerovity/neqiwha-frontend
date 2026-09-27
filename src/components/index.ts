@@ -13,7 +13,7 @@ export { SpotMarker, markerSize } from './SpotMarker';
 export { UserDot } from './UserDot';
 export { CenterPin } from './CenterPin';
 export { StatusChip, STATUS_LABEL } from './StatusChip';
-export { FilterChips } from './FilterChips';
+export { FilterChips, Pill as FilterPill } from './FilterChips';
 
 // Economy
 export { CoinPill } from './CoinPill';

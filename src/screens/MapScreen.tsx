@@ -3,7 +3,7 @@ import { Link, useLocation, useNavigate } from 'react-router';
 import { AnimatePresence, motion } from 'motion/react';
 import { AdvancedMarker, AdvancedMarkerAnchorPoint, Map as GMap } from '@vis.gl/react-google-maps';
 import { toast } from 'sonner';
-import { LoaderCircle, LocateFixed, LogIn, Plus, RotateCw } from 'lucide-react';
+import { LoaderCircle, LocateFixed, LogIn, Plus, RotateCw, SlidersHorizontal } from 'lucide-react';
 import type { EventPin } from '../shared/types';
 import { useConfig, useEvents, useMe } from '../lib/queries';
 import {
@@ -21,7 +21,6 @@ import {
   Button,
   CoinPill,
   EmptyState,
-  FilterChips,
   IconButton,
   Logo,
   SpotMarker,
@@ -30,7 +29,8 @@ import {
   TabBar,
   UserDot,
 } from '../components';
-import { MapCamera, RevealPin, type CameraTarget } from './parts/map/MapCamera';
+import { MapCamera, RadiusCircle, RevealPin, type CameraTarget } from './parts/map/MapCamera';
+import { DEFAULT_FILTERS, FiltersSheet, activeFilterCount, type MapFilters } from './parts/map/FiltersSheet';
 import { IntroSheet } from './parts/map/IntroSheet';
 
 const INTRO_KEY = 'nq_intro_seen';
@@ -59,7 +59,8 @@ export function MapScreen() {
   const [userPos, setUserPos] = useState<LatLng | null>(() => lastKnownPosition());
   const [camera, setCamera] = useState<CameraTarget | null>(null);
   const [locating, setLocating] = useState(false);
-  const [filters, setFilters] = useState({ showOpen: true, showCleaned: true });
+  const [filters, setFilters] = useState<MapFilters>(DEFAULT_FILTERS);
+  const [filtersOpen, setFiltersOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [intro, setIntro] = useState(() => !introSeen());
 
@@ -79,28 +80,37 @@ export function MapScreen() {
 
   const pins = events.data ?? [];
   const visible = useMemo(
-    () => pins.filter(p => (p.status === 'cleaned' ? filters.showCleaned : filters.showOpen)),
-    [pins, filters],
+    () =>
+      pins.filter(
+        p =>
+          (p.status === 'cleaned' ? filters.showCleaned : filters.showOpen) &&
+          (filters.radiusKm == null || !userPos || haversineKm(userPos, p) <= filters.radiusKm),
+      ),
+    [pins, filters, userPos],
   );
   const selected = visible.find(p => p.id === selectedId) ?? null;
   // Only re-evaluate on a new selection, not on every 15 s refetch.
   const revealPos = useMemo(() => (selected ? { lat: selected.lat, lng: selected.lng } : null), [selected?.id]);
 
-  const locate = async () => {
-    if (locating) return;
+  /** Reads the position; with `fly`, also centres the map on it. Resolves false when it could not be read. */
+  const locate = async (fly = true) => {
+    if (locating) return false;
     setLocating(true);
     try {
       const pos = await getPosition();
       setUserPos(pos);
-      setCamera({ pos, zoom: 15, nonce: Date.now() });
+      if (fly) setCamera({ pos, zoom: 15, nonce: Date.now() });
+      return true;
     } catch (err) {
       toast.error(err instanceof Error ? err.message : 'Could not get your location.', {
         description: 'Check location permissions for this site and try again.',
       });
+      return false;
     } finally {
       setLocating(false);
     }
   };
+  const filterCount = activeFilterCount(filters);
 
   const closeIntro = () => {
     setIntro(false);
@@ -129,6 +139,7 @@ export function MapScreen() {
       >
         <MapCamera target={camera} />
         <RevealPin pos={revealPos} />
+        <RadiusCircle center={userPos} radiusKm={filters.radiusKm} />
         {visible.map(p => {
           const isSel = p.id === selectedId;
           return (
@@ -192,7 +203,6 @@ export function MapScreen() {
           </div>
         </div>
         <div className="mt-3 flex items-center gap-2">
-          <FilterChips className="pointer-events-auto" {...filters} onChange={setFilters} />
           {events.isPending && (
             <span className="pointer-events-auto flex h-10 min-w-0 items-center gap-1.5 rounded-pill bg-surface/90 px-3 text-[13px] font-medium text-muted shadow-float">
               <LoaderCircle size={15} className="shrink-0 animate-spin" />
@@ -204,10 +214,27 @@ export function MapScreen() {
 
       {/* Bottom stack: locate-me, then the preview / empty / error card */}
       <div className="pointer-events-none absolute inset-x-0 z-10 flex flex-col gap-3 px-3" style={{ bottom: BOTTOM_GAP }}>
-        <motion.div layout="position" transition={{ type: 'spring', stiffness: 420, damping: 34 }} className="flex justify-end">
+        <motion.div
+          layout="position"
+          transition={{ type: 'spring', stiffness: 420, damping: 34 }}
+          className="flex flex-col items-end gap-3"
+        >
+          <IconButton
+            label={filterCount ? `Filters (${filterCount} on)` : 'Filters'}
+            onClick={() => setFiltersOpen(true)}
+            size={48}
+            className="pointer-events-auto relative"
+          >
+            <SlidersHorizontal size={21} strokeWidth={2.2} className={filterCount ? 'text-brand' : undefined} />
+            {filterCount > 0 && (
+              <span className="absolute -right-0.5 -top-0.5 grid size-5 animate-pop-in place-items-center rounded-full bg-brand text-[11px] font-bold text-white ring-2 ring-surface tabular-nums">
+                {filterCount}
+              </span>
+            )}
+          </IconButton>
           <IconButton
             label={locating ? 'Finding you…' : 'Show my location'}
-            onClick={locate}
+            onClick={() => locate()}
             disabled={locating}
             size={48}
             className="pointer-events-auto"
@@ -264,6 +291,15 @@ export function MapScreen() {
 
       <TabBar />
       <IntroSheet open={intro} onClose={closeIntro} />
+      <FiltersSheet
+        open={filtersOpen}
+        onClose={() => setFiltersOpen(false)}
+        filters={filters}
+        onChange={setFilters}
+        matchCount={visible.length}
+        ensureLocation={() => (userPos ? Promise.resolve(true) : locate(false))}
+        locating={locating}
+      />
     </div>
   );
 }

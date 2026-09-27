@@ -11,9 +11,20 @@
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
     <link href="https://fonts.googleapis.com/css2?family=Changa:wght@500;600;700;800&family=Readex+Pro:wght@400;500;600;700&display=swap" rel="stylesheet" />
+    <link rel="preload" as="image" href="/splash/frame-1.webp" />
+    <link rel="preload" as="image" href="/splash/frame-2.webp" />
+    <link rel="preload" as="image" href="/splash/frame-3.webp" />
+    <link rel="preload" as="image" href="/splash/frame-4.webp" />
+    <link rel="preload" as="image" href="/splash/backdrop.webp" />
     <title>Naqiwha</title>
   </head>
   <body>
+    <!-- Shown until React mounts the animated splash (LoadingSplash removes it). -->
+    <style>
+      #boot-splash { position: fixed; inset: 0; z-index: 99; background: #6FD83C url(/splash/frame-1.webp) center / cover no-repeat; }
+      @media (min-width: 481px) { #boot-splash { background-image: url(/splash/backdrop.webp); } }
+    </style>
+    <div id="boot-splash"></div>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
