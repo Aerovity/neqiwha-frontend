@@ -26,7 +26,7 @@ const STEPS: { icon: ReactNode; tint: string; title: string; body: string }[] = 
     ),
     tint: 'bg-coin-soft text-coin-ink',
     title: 'Level up',
-    body: 'AI checks the before and after. Earn XP, coins and manga stickers.',
+    body: 'AI checks the before and after. Earn XP and coins, then spend them at local shops.',
   },
 ];
 
@@ -42,8 +42,8 @@ export function IntroSheet({ open, onClose }: { open: boolean; onClose: () => vo
             <path d="M40 96 C 120 20, 200 120, 280 52 S 380 40, 390 30" fill="none" stroke="rgba(185,212,195,0.35)" strokeWidth="2.5" strokeDasharray="2 9" strokeLinecap="round" />
           </svg>
           {[
-            { left: '14%', top: '56%', el: <SpotMarker status="open" />, d: 0.1 },
-            { left: '48%', top: '44%', el: <SpotMarker status="in_progress" />, d: 0.25 },
+            { left: '14%', top: '56%', el: <SpotMarker status="open" participantCount={2} />, d: 0.1 },
+            { left: '48%', top: '44%', el: <SpotMarker status="in_progress" participantCount={5} />, d: 0.25 },
             { left: '80%', top: '34%', el: <SpotMarker status="cleaned" />, d: 0.4 },
           ].map(m => (
             <motion.span

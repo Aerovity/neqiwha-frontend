@@ -3,7 +3,7 @@ import { Lock } from 'lucide-react';
 import type { ShopItem } from '../shared/types';
 import { Button } from './Button';
 import { CoinIcon } from './icons';
-import { StickerArt } from './VoucherTicket';
+import { ItemArt } from './VoucherTicket';
 
 export interface ShopItemCardProps {
   item: ShopItem;
@@ -14,14 +14,14 @@ export interface ShopItemCardProps {
   className?: string;
 }
 
-/** Shop item: sticker art, partner, title, description, price; "Get it" or disabled "Need X more coins" + progress. */
+/** Shop item: item art, partner, title, description, price; "Get it" or disabled "Need X more coins" + progress. */
 export function ShopItemCard({ item, coins, onGet, loading, className }: ShopItemCardProps) {
   const missing = Math.max(0, item.cost - coins);
   const canBuy = missing === 0;
   return (
     <article className={clsx('rounded-card bg-surface p-4 shadow-card', className)}>
       <div className="flex gap-4">
-        <StickerArt size={88} />
+        <ItemArt emoji={item.emoji} tone={item.tone} size={88} />
         <div className="min-w-0 flex-1">
           <div className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">{item.partner}</div>
           <h3 className="mt-0.5 font-display text-[22px] font-bold leading-tight">{item.title}</h3>

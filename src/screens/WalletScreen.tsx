@@ -36,7 +36,7 @@ export function WalletScreen() {
           <EmptyState
             icon={<Wallet size={34} />}
             title="No vouchers yet"
-            body="Cleanups earn coins, coins get stickers."
+            body="Cleanups earn coins, coins get rewards."
             action={
               <Link to="/shop" className="font-semibold text-brand">
                 Browse the shop

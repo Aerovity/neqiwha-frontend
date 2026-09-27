@@ -36,7 +36,7 @@ export function HistoryScreen() {
           <EmptyState
             icon={<History size={34} />}
             title="No history yet"
-            body="Join a cleanup or grab a sticker — your XP and coins will show up here."
+            body="Join a cleanup or grab a reward — your XP and coins will show up here."
           />
         )}
         {history.isSuccess && groups.length > 0 && (

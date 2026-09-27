@@ -44,7 +44,7 @@ export function RewardCelebration() {
   const shopCta =
     isLast && (me.data?.coins ?? 0) >= 100 ? (
       <ButtonLink to="/shop" variant="secondary" size="lg" full onClick={() => finish(queue)}>
-        Get your sticker 🎁
+        Spend your coins 🎁
       </ButtonLink>
     ) : undefined;
 

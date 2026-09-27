@@ -36,7 +36,9 @@ import { IntroSheet } from './parts/map/IntroSheet';
 const INTRO_KEY = 'nq_intro_seen';
 const BOTTOM_GAP = `calc(${TAB_BAR_HEIGHT}px + env(safe-area-inset-bottom) + 22px)`;
 
-const markerZ = (p: EventPin, selected: boolean) => (selected ? 30 : p.status === 'cleaned' ? 1 : 10);
+// Bigger (busier) markers draw on top of smaller ones.
+const markerZ = (p: EventPin, selected: boolean) =>
+  selected ? 30 : p.status === 'cleaned' ? 1 : 2 + Math.min(p.participantCount, 15); // stays under the user dot (20)
 
 function introSeen() {
   try {
@@ -138,7 +140,7 @@ export function MapScreen() {
               onClick={() => setSelectedId(p.id)}
               title={p.title}
             >
-              <SpotMarker status={p.status} selected={isSel} />
+              <SpotMarker status={p.status} participantCount={p.participantCount} selected={isSel} />
             </AdvancedMarker>
           );
         })}

@@ -48,7 +48,7 @@ export { ParticipantStack } from './ParticipantStack';
 export { Ticket } from './Ticket';
 export { QrTicket } from './QrTicket';
 export { CheckedInSuccess } from './CheckedInSuccess';
-export { VoucherTicket, StickerArt } from './VoucherTicket';
+export { VoucherTicket, ItemArt } from './VoucherTicket';
 export { HoldButton } from './HoldButton';
 export { CelebrationOverlay } from './CelebrationOverlay';
 export { LevelUpReveal } from './LevelUpReveal';

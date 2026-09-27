@@ -101,7 +101,7 @@ export function ProfileScreen() {
 
         <div className="flex flex-col gap-2">
           <ActionRow to="/me/qr" icon={<QrCode size={20} />} label="My QR" desc="Show at check-in" />
-          <ActionRow to="/wallet" icon={<Wallet size={20} />} label="Wallet" desc="Manga stickers & vouchers" />
+          <ActionRow to="/wallet" icon={<Wallet size={20} />} label="Wallet" desc="Your partner vouchers" />
           <ActionRow to="/ranks" icon={<Medal size={20} />} label="All ranks" desc="Perks and progress" />
           <ActionRow to="/history" icon={<History size={20} />} label="History" desc="XP, coins and level-ups" />
           {user.isAdmin && (

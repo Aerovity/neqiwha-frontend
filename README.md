@@ -10,12 +10,12 @@ This repository is the **mobile-first web app**. The API lives in [neqiwha-backe
 
 ## Features
 
-- **Live map** of spots, colour-coded by state: 🔴 red trash bin = not cleaned yet, 🟡 yellow clock = cleaning now, 🟢 green logo = cleaned. Includes filter chips and a preview card.
+- **Live map** of spots, one icon per state: red trash bin = not cleaned yet, green broom = cleaning now, dark green leaf = cleaned. Markers grow with the number of participants. Includes filter chips and a preview card.
 - **Spot a mess.** Capture a photo with the live camera, then Gemini checks it and pre-fills the title and description. The spot is pinned at your live GPS position. You can publish it as a public cleanup with a meeting time, or as a private, anonymous solo cleanup.
 - **Join and check in.** Every user has a personal QR ticket. The organizer scans it on site (camera scanner or manual code entry). The screen stays awake while the QR ticket is shown.
 - **Finish.** The organizer takes the AFTER photo, and the AI compares it with the BEFORE photo. If it passes, everyone checked in gets XP and coins, with a celebration overlay, confetti and a rank-up reveal.
 - **Ranks.** Five levels, from *Mowatin* to *Khadra bi idn Allah*. Each rank has its own insignia, avatar frame and perks.
-- **Shop and wallet.** Spend coins on vouchers from the partner shop (HB Kisa Manga). You redeem a voucher at the counter with a hold-to-use ticket.
+- **Shop and wallet.** Spend coins on vouchers from partner shops (a made-up demo catalogue: café, pizzeria, plant nursery, bookshop, surf club, cinema). You redeem a voucher at the counter with a hold-to-use ticket.
 - **Leaderboard** with a podium, plus a personal **history** feed.
 - **Admin panel** (`/admin`, admins only): close, reopen or delete spots, manage admins and view the action log.
 - Passwordless **email login** with a 6-digit code.
@@ -48,7 +48,7 @@ src/
   lib/                api client, queries, formatting, geo, image and history helpers
   shared/             types, ranks and shop catalogue — frozen contract, identical to neqiwha-backend/shared/
   styles/theme.css    brand tokens
-public/brand/         logo mark, map pin and rank insignia SVGs
+public/brand/         logo mark, map pin, rank insignia and map marker SVGs
 ```
 
 > `src/shared/` must stay identical to the backend's `shared/` folder, so don't edit it on one side only.

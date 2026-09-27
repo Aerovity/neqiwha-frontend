@@ -108,14 +108,14 @@ const ANALYSIS: PhotoAnalysis = {
 };
 
 const VOUCHERS: Voucher[] = [
-  { id: 'v1', itemId: 'hbk-sticker', partner: 'HB Kisa Manga', title: 'Manga sticker', code: 'HBK-7F3K9Q', cost: 100, status: 'active', createdAt: hoursFromNow(-3), usedAt: null },
-  { id: 'v2', itemId: 'hbk-sticker', partner: 'HB Kisa Manga', title: 'Manga sticker', code: 'HBK-2M8XQA', cost: 100, status: 'used', createdAt: hoursFromNow(-200), usedAt: hoursFromNow(-150) },
+  { id: 'v1', itemId: 'bahdja-espresso', partner: 'Café El Bahdja', title: 'Espresso on the house', code: 'NQW-7F3K9Q', cost: 100, status: 'active', createdAt: hoursFromNow(-3), usedAt: null },
+  { id: 'v2', itemId: 'zitoun-slice', partner: 'Pizzeria Dar Zitoun', title: 'Slice + soda', code: 'NQW-2M8XQA', cost: 100, status: 'used', createdAt: hoursFromNow(-200), usedAt: hoursFromNow(-150) },
 ];
 
 const HISTORY: HistoryEntry[] = [
   { id: 'h1', kind: 'cleanup', eventId: 'e3', eventTitle: 'Plastic bottles on the beach stairs', xpDelta: 100, coinsDelta: 100, levelAfter: null, createdAt: hoursFromNow(-0.2), voucherTitle: null },
   { id: 'h2', kind: 'level_up', eventId: null, eventTitle: null, xpDelta: 0, coinsDelta: 100, levelAfter: 1, createdAt: hoursFromNow(-0.2), voucherTitle: null },
-  { id: 'h3', kind: 'purchase', eventId: null, eventTitle: null, xpDelta: 0, coinsDelta: -100, levelAfter: null, createdAt: hoursFromNow(-26), voucherTitle: 'Manga sticker' },
+  { id: 'h3', kind: 'purchase', eventId: null, eventTitle: null, xpDelta: 0, coinsDelta: -100, levelAfter: null, createdAt: hoursFromNow(-26), voucherTitle: 'Espresso on the house' },
   { id: 'h4', kind: 'cleanup', eventId: 'e9', eventTitle: 'Organized: Sablettes promenade', xpDelta: 150, coinsDelta: 300, levelAfter: null, createdAt: hoursFromNow(-200), voucherTitle: null },
 ];
 
@@ -388,7 +388,7 @@ export function KitScreen() {
           <Button variant="secondary">Leave</Button>
           <Button variant="ghost">Change</Button>
           <Button variant="danger" icon={<Trash2 size={18} />}>Delete</Button>
-          <Button variant="gold" icon={<Gift size={18} />}>Get your sticker</Button>
+          <Button variant="gold" icon={<Gift size={18} />}>Spend your coins</Button>
           <Button variant="dark">Enter code</Button>
           <div className="rounded-pill bg-deep p-1.5">
             <Button variant="light">Yallah!</Button>
@@ -483,8 +483,8 @@ export function KitScreen() {
         </Sheet>
         <ConfirmSheet
           open={confirm}
-          title="Spend 100 coins on a Manga sticker?"
-          body="You'll get a voucher to show at the HB Kisa Manga counter."
+          title="Spend 100 coins on Espresso on the house?"
+          body="You'll get a voucher to show at the Café El Bahdja counter."
           confirmLabel="Confirm"
           tone="gold"
           loading={confirmLoading}
@@ -494,7 +494,7 @@ export function KitScreen() {
             later(() => {
               setConfirmLoading(false);
               setConfirm(false);
-              toast.success('Sticker voucher added to your wallet 🎁');
+              toast.success('Voucher added to your wallet 🎁');
             }, 1200);
           }}
         />
@@ -642,7 +642,7 @@ export function KitScreen() {
               onDone={() => setLevelUp(null)}
               ctaExtra={
                 <Button variant="ghost" size="lg" className="text-white hover:bg-white/10" onClick={() => setLevelUp(null)}>
-                  Get your sticker 🎁
+                  Spend your coins 🎁
                 </Button>
               }
             />
@@ -748,7 +748,7 @@ export function KitScreen() {
           />
         </Demo>
         <Demo label="EmptyState · wallet">
-          <EmptyState icon={<Wallet size={34} />} title="No vouchers yet" body="Cleanups earn coins, coins get stickers." />
+          <EmptyState icon={<Wallet size={34} />} title="No vouchers yet" body="Cleanups earn coins, coins get rewards." />
         </Demo>
       </Section>
 

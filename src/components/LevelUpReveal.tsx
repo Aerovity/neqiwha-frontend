@@ -13,7 +13,7 @@ export interface LevelUpRevealProps {
   level: RankLevel;
   gift: number;
   onDone: () => void;
-  /** Extra actions under "Yallah!" (e.g. "Get your sticker 🎁"). */
+  /** Extra actions under "Yallah!" (e.g. "Spend your coins 🎁"). */
   ctaExtra?: ReactNode;
   doneLabel?: string;
 }

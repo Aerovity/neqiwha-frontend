@@ -1,6 +1,7 @@
 import clsx from 'clsx';
-import { ChevronRight, Sticker } from 'lucide-react';
-import type { Voucher } from '../shared/types';
+import { ChevronRight } from 'lucide-react';
+import type { ShopTone, Voucher } from '../shared/types';
+import { SHOP_ITEMS } from '../shared/shop';
 import { formatDate } from '../lib/format';
 import { Ticket } from './Ticket';
 import { CoinIcon } from './icons';
@@ -12,7 +13,7 @@ export interface VoucherTicketProps {
   className?: string;
 }
 
-/** Partner voucher: HB Kisa Manga header, item, big code, issued date, status; used = dimmed + stamp. */
+/** Partner voucher: partner header, item, big code, issued date, status; used = dimmed + stamp. */
 export function VoucherTicket({ voucher, compact, className }: VoucherTicketProps) {
   const used = voucher.status === 'used';
   if (compact) return <VoucherRow voucher={voucher} className={className} />;
@@ -24,7 +25,7 @@ export function VoucherTicket({ voucher, compact, className }: VoucherTicketProp
         topClassName="bg-[linear-gradient(160deg,#0B3D2E_0%,#04140D_85%)] text-white"
         top={
           <div className="relative flex items-center gap-4 overflow-hidden px-6 pb-7 pt-7">
-            <StickerArt size={72} />
+            <ItemArt {...artFor(voucher.itemId)} size={72} />
             <div className="min-w-0">
               <div className="text-xs font-semibold uppercase tracking-[0.14em] text-mist">Partner voucher</div>
               <div className="mt-1 truncate font-display text-[26px] font-bold leading-tight">{voucher.partner}</div>
@@ -85,7 +86,7 @@ function VoucherRow({ voucher, className }: { voucher: Voucher; className?: stri
   const used = voucher.status === 'used';
   return (
     <div className={clsx('flex items-center gap-3.5 rounded-card bg-surface p-3 pr-4 shadow-card', used && 'opacity-60', className)}>
-      <StickerArt size={56} muted={used} />
+      <ItemArt {...artFor(voucher.itemId)} size={56} muted={used} />
       <div className="min-w-0 flex-1">
         <div className="truncate font-semibold">{voucher.title}</div>
         <div className="truncate text-[13px] text-muted">{voucher.partner}</div>
@@ -99,21 +100,31 @@ function VoucherRow({ voucher, className }: { voucher: Voucher; className?: stri
   );
 }
 
-/** Sticker illustration (lucide Sticker on a sunny tile). */
-export function StickerArt({ size = 72, muted }: { size?: number; muted?: boolean }) {
+const TONES: Record<ShopTone, string> = {
+  sun: 'bg-[radial-gradient(circle_at_30%_25%,#FFE58A_0%,#F2B705_60%,#D99F00_100%)] shadow-[0_8px_18px_-8px_rgba(192,138,0,0.8)]',
+  coral: 'bg-[radial-gradient(circle_at_30%_25%,#FFC2B0_0%,#FF7A59_60%,#E0522F_100%)] shadow-[0_8px_18px_-8px_rgba(224,82,47,0.8)]',
+  mint: 'bg-[radial-gradient(circle_at_30%_25%,#C8F7C5_0%,#4CD27A_60%,#1FA75A_100%)] shadow-[0_8px_18px_-8px_rgba(31,167,90,0.8)]',
+  grape: 'bg-[radial-gradient(circle_at_30%_25%,#E3CCFF_0%,#9B6BFF_60%,#7443E0_100%)] shadow-[0_8px_18px_-8px_rgba(116,67,224,0.8)]',
+  sky: 'bg-[radial-gradient(circle_at_30%_25%,#C4ECFF_0%,#3BAFF2_60%,#1583C9_100%)] shadow-[0_8px_18px_-8px_rgba(21,131,201,0.8)]',
+  night: 'bg-[radial-gradient(circle_at_30%_25%,#5B6B86_0%,#27324A_60%,#141B2B_100%)] shadow-[0_8px_18px_-8px_rgba(20,27,43,0.8)]',
+};
+
+/** Art for a voucher: the matching shop item, or a gift for items no longer in the shop. */
+const artFor = (itemId: string) => SHOP_ITEMS.find(i => i.id === itemId) ?? { emoji: '🎁', tone: 'sun' as const };
+
+/** Item illustration: the item's emoji on a white tile over a coloured square. */
+export function ItemArt({ emoji, tone, size = 72, muted }: { emoji: string; tone: ShopTone; size?: number; muted?: boolean }) {
   return (
     <span
       aria-hidden
-      className={clsx(
-        'relative grid shrink-0 place-items-center rounded-[22%]',
-        muted
-          ? 'bg-line-soft text-muted'
-          : 'bg-[radial-gradient(circle_at_30%_25%,#FFE58A_0%,#F2B705_60%,#D99F00_100%)] text-ink shadow-[0_8px_18px_-8px_rgba(192,138,0,0.8)]',
-      )}
+      className={clsx('relative grid shrink-0 place-items-center rounded-[22%]', muted ? 'bg-line-soft grayscale' : TONES[tone])}
       style={{ width: size, height: size }}
     >
-      <span className="grid rotate-[-10deg] place-items-center rounded-[26%] bg-white p-[14%] shadow-[0_2px_6px_rgba(0,0,0,0.15)]">
-        <Sticker size={size * 0.42} strokeWidth={2.1} />
+      <span
+        className="grid rotate-[-10deg] place-items-center rounded-[26%] bg-white shadow-[0_2px_6px_rgba(0,0,0,0.15)]"
+        style={{ width: size * 0.62, height: size * 0.62, fontSize: size * 0.36, lineHeight: 1 }}
+      >
+        {emoji}
       </span>
       {!muted && <span className="absolute right-[12%] top-[10%] size-[10%] rounded-full bg-white/90" />}
     </span>

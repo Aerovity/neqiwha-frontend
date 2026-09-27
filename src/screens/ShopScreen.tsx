@@ -9,22 +9,27 @@ import {
   Sheet,
   ShopItemCard,
   Skeleton,
-  StickerArt,
+  ItemArt,
   TAB_BAR_SPACE,
   TabBar,
   VoucherTicket,
 } from '../components';
 import { ApiError } from '../lib/api';
-import { useConfig, useMe, usePurchase, useShop } from '../lib/queries';
+import { useMe, usePurchase, useShop } from '../lib/queries';
 import type { ShopItem, Voucher } from '../shared/types';
 
+/** Groups items by partner, keeping the catalogue order. */
+function byPartner(items: ShopItem[]): [string, ShopItem[]][] {
+  const groups = new Map<string, ShopItem[]>();
+  for (const item of items) groups.set(item.partner, [...(groups.get(item.partner) ?? []), item]);
+  return [...groups];
+}
+
 export function ShopScreen() {
-  const config = useConfig();
   const me = useMe();
   const shop = useShop();
   const purchase = usePurchase();
   const coins = me.data?.coins ?? 0;
-  const partner = config.data?.partnerName ?? 'HB Kisa Manga';
 
   const [pending, setPending] = useState<ShopItem | null>(null);
   const [fresh, setFresh] = useState<Voucher | null>(null);
@@ -35,7 +40,7 @@ export function ShopScreen() {
       onSuccess: res => {
         setPending(null);
         setFresh(res.voucher);
-        toast.success('Sticker secured! Show it at the counter.');
+        toast.success('Reward secured! Show it at the counter.');
       },
       onError: err => toast.error(err instanceof ApiError ? err.message : 'Purchase failed. Try again.'),
     });
@@ -53,9 +58,9 @@ export function ShopScreen() {
               <Store size={28} className="text-sprout" />
             </span>
             <div className="min-w-0">
-              <div className="text-xs font-semibold uppercase tracking-[0.12em] text-mist">Partner shop</div>
-              <h2 className="font-display text-[26px] font-bold leading-tight">{partner}</h2>
-              <p className="mt-1 text-sm text-mist">Turn cleanup coins into manga stickers at the counter.</p>
+              <div className="text-xs font-semibold uppercase tracking-[0.12em] text-mist">Partner shops</div>
+              <h2 className="font-display text-[26px] font-bold leading-tight">Spend it local</h2>
+              <p className="mt-1 text-sm text-mist">Turn cleanup coins into coffee, books, cinema and more.</p>
             </div>
           </div>
         </section>
@@ -72,19 +77,27 @@ export function ShopScreen() {
           </p>
         )}
         {shop.isSuccess &&
-          shop.data.map(item => (
-            <ShopItemCard
-              key={item.id}
-              item={item}
-              coins={coins}
-              loading={purchase.isPending && pending?.id === item.id}
-              onGet={() => setPending(item)}
-            />
+          byPartner(shop.data).map(([partner, items]) => (
+            <section key={partner} className="flex flex-col gap-3">
+              <h2 className="mt-2 flex items-center gap-2 px-1 font-display text-lg font-bold">
+                <Store size={18} className="text-brand" />
+                {partner}
+              </h2>
+              {items.map(item => (
+                <ShopItemCard
+                  key={item.id}
+                  item={item}
+                  coins={coins}
+                  loading={purchase.isPending && pending?.id === item.id}
+                  onGet={() => setPending(item)}
+                />
+              ))}
+            </section>
           ))}
 
         <article className="rounded-card bg-surface p-4 shadow-card">
           <div className="flex gap-4 opacity-75">
-            <StickerArt size={72} muted />
+            <ItemArt emoji="🎁" tone="sun" size={72} muted />
             <div className="min-w-0 flex-1">
               <div className="text-xs font-semibold uppercase tracking-[0.1em] text-muted">Coming soon</div>
               <h3 className="mt-0.5 font-display text-[22px] font-bold leading-tight text-muted">More rewards soon</h3>
@@ -104,7 +117,7 @@ export function ShopScreen() {
 
       <ConfirmSheet
         open={!!pending}
-        title={`Spend ${pending?.cost ?? 0} coins on a Manga sticker?`}
+        title={`Spend ${pending?.cost ?? 0} coins on ${pending?.title ?? 'this reward'}?`}
         body={
           pending ? (
             <>
@@ -131,7 +144,7 @@ export function ShopScreen() {
       <Sheet open={!!fresh} onClose={() => setFresh(null)} title="You got it! 🎁">
         <div className="flex flex-col items-center gap-5">
           {fresh && <VoucherTicket voucher={fresh} className="pointer-events-none" />}
-          <p className="max-w-sm text-center text-[15px] text-muted">Show this voucher at {partner} when you pick your sticker.</p>
+          <p className="max-w-sm text-center text-[15px] text-muted">Show this voucher at {fresh?.partner} to claim your reward.</p>
           <ButtonLink to="/wallet" size="lg" full onClick={() => setFresh(null)}>
             Open wallet
           </ButtonLink>
