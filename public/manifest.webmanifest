@@ -1,0 +1,12 @@
+{
+  "name": "Naqiwha",
+  "short_name": "Naqiwha",
+  "description": "Spot a mess. Clean it together. Level up.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F4F7F6",
+  "theme_color": "#0B3D2E",
+  "icons": [
+    { "src": "/favicon.svg", "sizes": "any", "type": "image/svg+xml" }
+  ]
+}
