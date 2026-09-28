@@ -4,6 +4,8 @@ import type {
   AdminAction, AdminEvent, AdminStats, AdminUser, AppConfig, CheckinResult, CompleteResult, EventDetail, EventPin, HistoryEntry, LeaderboardResponse, Me,
   PhotoAnalysis, ShopItem, Voucher,
 } from '../shared/types';
+import type { ChatMessage, ChatPage } from '../shared/chat';
+import { mergeChat, type ChatView } from './chat';
 
 // ---------- queries ----------
 
@@ -55,6 +57,23 @@ export const useMyEvents = () =>
     queryKey: ['my-events'],
     queryFn: () => api<{ organized: EventPin[]; joined: EventPin[] }>('/me/events'),
   });
+
+// Polls every 3 s for messages created or deleted since the last cursor, merging them into the cached view.
+// Stops on any error (e.g. 403 after leaving the spot, 410 once the chat has closed).
+export const useChat = (id: string | undefined) => {
+  const qc = useQueryClient();
+  return useQuery({
+    queryKey: ['chat', id],
+    queryFn: async () => {
+      const prev = qc.getQueryData<ChatView>(['chat', id]);
+      const since = prev ? `?since=${encodeURIComponent(prev.cursor)}` : '';
+      return mergeChat(prev, await api<ChatPage>(`/events/${id}/messages${since}`));
+    },
+    enabled: !!id,
+    retry: (count, err) => !(err instanceof ApiError && [401, 403, 404, 409, 410].includes(err.status)) && count < 1,
+    refetchInterval: q => (q.state.error ? false : 3000),
+  });
+};
 
 // ---------- mutations ----------
 
@@ -251,5 +270,30 @@ export function useSetAdmin() {
     mutationFn: ({ id, isAdmin }: { id: string; isAdmin: boolean }) =>
       api<{ ok: true }>(`/admin/users/${id}/admin`, { method: 'POST', json: { isAdmin } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin'] }),
+  });
+}
+
+// ---------- chat ----------
+
+/** Puts a message the server just returned into the cached chat without waiting for the next poll. */
+function useMergeMessage(id: string) {
+  const qc = useQueryClient();
+  return (msg: ChatMessage) =>
+    qc.setQueryData<ChatView>(['chat', id], v => v && mergeChat(v, { ...v, messages: [msg] }));
+}
+
+export function useSendMessage(id: string) {
+  const merge = useMergeMessage(id);
+  return useMutation({
+    mutationFn: (body: string) => api<ChatMessage>(`/events/${id}/messages`, { method: 'POST', json: { body } }),
+    onSuccess: merge,
+  });
+}
+
+export function useDeleteMessage(id: string) {
+  const merge = useMergeMessage(id);
+  return useMutation({
+    mutationFn: (messageId: string) => api<ChatMessage>(`/events/${id}/messages/${messageId}`, { method: 'DELETE' }),
+    onSuccess: merge,
   });
 }
