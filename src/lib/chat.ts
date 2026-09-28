@@ -6,10 +6,14 @@ const HOUR = 60 * 60 * 1000;
 /** The chat as the screen sees it: every message received so far, plus the latest page's state. */
 export type ChatView = { messages: ChatMessage[]; cursor: string; state: ChatState; canPost: boolean; closesAt: string | null };
 
-/** Merges a page of new or changed messages into the view (replace by id, oldest first). */
+/** Merges a page of new or changed messages into the view (replace by id, oldest first). Deletion is final: a stale
+ *  copy from an overlapping poll never brings a deleted message back. */
 export function mergeChat(prev: ChatView | undefined, page: ChatPage): ChatView {
   const byId = new Map((prev?.messages ?? []).map(m => [m.id, m]));
-  for (const m of page.messages) byId.set(m.id, m);
+  for (const m of page.messages) {
+    if (byId.get(m.id)?.deleted && !m.deleted) continue;
+    byId.set(m.id, m);
+  }
   const messages = [...byId.values()].sort((a, b) =>
     a.createdAt === b.createdAt ? a.id.localeCompare(b.id) : a.createdAt < b.createdAt ? -1 : 1);
   return { messages, cursor: page.cursor, state: page.state, canPost: page.canPost, closesAt: page.closesAt };

@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { api, ApiError } from './api';
 import type {
   AdminAction, AdminEvent, AdminStats, AdminUser, AppConfig, CheckinResult, CompleteResult, EventDetail, EventPin, HistoryEntry, LeaderboardResponse, Me,
@@ -61,17 +61,25 @@ export const useMyEvents = () =>
 /** Answers that won't change by retrying: logged out, left the spot, spot gone, solo spot, chat closed. */
 export const isChatGone = (err: unknown) => err instanceof ApiError && [401, 403, 404, 409, 410].includes(err.status);
 
+/**
+ * One poll: asks for what changed since the cached cursor, then merges into the cache as it is *now*, so a message
+ * sent or deleted while the request was in flight isn't overwritten.
+ */
+export async function fetchChat(qc: QueryClient, id: string): Promise<ChatView> {
+  const key = ['chat', id];
+  const start = qc.getQueryData<ChatView>(key);
+  const since = start ? `?since=${encodeURIComponent(start.cursor)}` : '';
+  const page = await api<ChatPage>(`/events/${id}/messages${since}`);
+  return mergeChat(qc.getQueryData<ChatView>(key), page);
+}
+
 // Polls every 3 s for messages created or deleted since the last cursor, merging them into the cached view.
 // Stops once the chat is gone for this viewer; a network blip only skips a beat.
 export const useChat = (id: string | undefined) => {
   const qc = useQueryClient();
   return useQuery({
     queryKey: ['chat', id],
-    queryFn: async () => {
-      const prev = qc.getQueryData<ChatView>(['chat', id]);
-      const since = prev ? `?since=${encodeURIComponent(prev.cursor)}` : '';
-      return mergeChat(prev, await api<ChatPage>(`/events/${id}/messages${since}`));
-    },
+    queryFn: () => fetchChat(qc, id!),
     enabled: !!id,
     retry: (count, err) => !isChatGone(err) && count < 1,
     refetchInterval: q => (isChatGone(q.state.error) ? false : 3000),

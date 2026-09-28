@@ -259,6 +259,8 @@ function Composer({ eventId }: { eventId: string }) {
   const send = useSendMessage(eventId);
   const [draft, setDraft] = useState('');
   const inputRef = useRef<HTMLTextAreaElement>(null);
+  // isPending only updates after a re-render; this flag closes the gap between two fast taps or Enter presses.
+  const sending = useRef(false);
 
   // Auto-grow up to 5 lines, then scroll inside the box.
   useLayoutEffect(() => {
@@ -270,10 +272,12 @@ function Composer({ eventId }: { eventId: string }) {
 
   const submit = () => {
     const text = draft.trim();
-    if (!text || send.isPending) return;
+    if (!text || sending.current) return;
+    sending.current = true;
     send.mutate(text, {
       onSuccess: () => setDraft(''),
       onError: err => toast.error(errorMessage(err)),
+      onSettled: () => { sending.current = false; },
     });
   };
 
