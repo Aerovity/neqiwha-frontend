@@ -58,8 +58,11 @@ export const useMyEvents = () =>
     queryFn: () => api<{ organized: EventPin[]; joined: EventPin[] }>('/me/events'),
   });
 
+/** Answers that won't change by retrying: logged out, left the spot, spot gone, solo spot, chat closed. */
+export const isChatGone = (err: unknown) => err instanceof ApiError && [401, 403, 404, 409, 410].includes(err.status);
+
 // Polls every 3 s for messages created or deleted since the last cursor, merging them into the cached view.
-// Stops on any error (e.g. 403 after leaving the spot, 410 once the chat has closed).
+// Stops once the chat is gone for this viewer; a network blip only skips a beat.
 export const useChat = (id: string | undefined) => {
   const qc = useQueryClient();
   return useQuery({
@@ -70,8 +73,8 @@ export const useChat = (id: string | undefined) => {
       return mergeChat(prev, await api<ChatPage>(`/events/${id}/messages${since}`));
     },
     enabled: !!id,
-    retry: (count, err) => !(err instanceof ApiError && [401, 403, 404, 409, 410].includes(err.status)) && count < 1,
-    refetchInterval: q => (q.state.error ? false : 3000),
+    retry: (count, err) => !isChatGone(err) && count < 1,
+    refetchInterval: q => (isChatGone(q.state.error) ? false : 3000),
   });
 };
 
