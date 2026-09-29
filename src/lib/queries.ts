@@ -63,13 +63,15 @@ export const isChatGone = (err: unknown) => err instanceof ApiError && [401, 403
 
 /**
  * One poll: asks for what changed since the cached cursor, then merges into the cache as it is *now*, so a message
- * sent or deleted while the request was in flight isn't overwritten.
+ * sent or deleted while the request was in flight isn't overwritten. When the chat's state changes (cleaned, closed,
+ * reopened), unchanged messages' `canDelete` may be stale too, so it reloads the full page once.
  */
 export async function fetchChat(qc: QueryClient, id: string): Promise<ChatView> {
   const key = ['chat', id];
+  const url = `/events/${id}/messages`;
   const start = qc.getQueryData<ChatView>(key);
-  const since = start ? `?since=${encodeURIComponent(start.cursor)}` : '';
-  const page = await api<ChatPage>(`/events/${id}/messages${since}`);
+  let page = await api<ChatPage>(start ? `${url}?since=${encodeURIComponent(start.cursor)}` : url);
+  if (start && page.state !== start.state) page = await api<ChatPage>(url);
   return mergeChat(qc.getQueryData<ChatView>(key), page);
 }
 

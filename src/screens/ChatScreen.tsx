@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type KeyboardEvent, type MouseEvent } from 'react';
 import { useParams } from 'react-router';
 import clsx from 'clsx';
 import { ArrowDown, Ellipsis, Lock, MessageCircle, SearchX, SendHorizontal, ShieldCheck } from 'lucide-react';
@@ -135,6 +135,8 @@ function MessageList({ messages, onAskDelete }: { messages: ChatMessage[]; onAsk
   const nearBottom = useRef(true);
   const prevCount = useRef(0);
   const [unseen, setUnseen] = useState(false);
+  // Screen readers hear new messages from others as they arrive, not the whole history on first load.
+  const [announcement, setAnnouncement] = useState('');
 
   const scrollToBottom = (behavior: ScrollBehavior) => {
     const el = listRef.current;
@@ -147,6 +149,10 @@ function MessageList({ messages, onAskDelete }: { messages: ChatMessage[]; onAsk
       if (prevCount.current === 0) scrollToBottom('auto');
       else if (nearBottom.current || messages[count - 1]?.mine) scrollToBottom(scrollBehavior());
       else setUnseen(true);
+      const latest = messages[count - 1];
+      if (prevCount.current > 0 && latest && !latest.mine && !latest.deleted) {
+        setAnnouncement(`${latest.author?.displayName ?? 'Former hero'}: ${latest.body}`);
+      }
     }
     prevCount.current = count;
   }, [messages]);
@@ -168,7 +174,8 @@ function MessageList({ messages, onAskDelete }: { messages: ChatMessage[]; onAsk
 
   return (
     <div className="relative min-h-0 flex-1">
-      <div ref={listRef} onScroll={onScroll} className="h-full overflow-y-auto px-4 py-3" aria-live="polite">
+      <p className="sr-only" aria-live="polite">{announcement}</p>
+      <div ref={listRef} onScroll={onScroll} className="h-full overflow-y-auto px-4 py-3">
         {groupByDay(messages).map(group => (
           <section key={group.key} className="flex flex-col gap-1.5">
             <h2 className="my-2 self-center rounded-pill bg-line-soft px-3 py-1 text-xs font-medium text-muted">{group.label}</h2>
@@ -201,6 +208,7 @@ function Bubble({ message: m, showAuthor, onAskDelete }: {
 }) {
   const pressTimer = useRef<number | undefined>(undefined);
   const cancelPress = () => window.clearTimeout(pressTimer.current);
+  useEffect(() => cancelPress, []);
   const longPress = m.canDelete
     ? {
         onTouchStart: () => { pressTimer.current = window.setTimeout(() => onAskDelete(m.id), LONG_PRESS_MS); },
@@ -230,7 +238,9 @@ function Bubble({ message: m, showAuthor, onAskDelete }: {
         <div
           {...longPress}
           className={clsx(
-            'rounded-card px-3.5 py-2 text-[15px] leading-snug select-text',
+            'rounded-card px-3.5 py-2 text-[15px] leading-snug',
+            // Long-press opens "Delete this message?"; keep iOS from showing its copy/select callout on top of it.
+            m.canDelete ? 'select-none [-webkit-touch-callout:none]' : 'select-text',
             m.deleted ? 'bg-line-soft text-muted italic'
             : m.mine ? 'rounded-br-sm bg-brand text-white'
             : 'rounded-bl-sm bg-surface text-ink shadow-card',
