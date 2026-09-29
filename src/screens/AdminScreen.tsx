@@ -2,10 +2,10 @@ import { useDeferredValue, useState, type ReactNode } from 'react';
 import { Link, Navigate } from 'react-router';
 import clsx from 'clsx';
 import {
-  Ban, Lock, LockOpen, Search, ShieldCheck, ShieldOff, ShieldPlus, Trash2,
+  Ban, Lock, LockOpen, MessageCircle, MessageSquareX, Search, ShieldCheck, ShieldOff, ShieldPlus, Trash2,
 } from 'lucide-react';
 import { toast } from 'sonner';
-import { Avatar, Button, Chip, ConfirmSheet, EmptyState, ScreenHeader, Skeleton, StatusChip } from '../components';
+import { Avatar, Button, ButtonLink, Chip, ConfirmSheet, EmptyState, ScreenHeader, Skeleton, StatusChip } from '../components';
 import { errorMessage } from '../lib/api';
 import { formatNumber, formatRelative, plural } from '../lib/format';
 import {
@@ -261,6 +261,11 @@ function SpotRow({ ev, onAction }: { ev: AdminEvent; onAction: (a: AdminEventAct
         <span className="mr-auto text-[13px] text-muted">
           {ev.isPublic ? `${plural(ev.participantCount, 'hero', 'heroes')}, ${ev.checkedInCount} checked in` : 'Solo cleanup'}
         </span>
+        {ev.isPublic && (
+          <ButtonLink to={`/spots/${ev.id}/chat`} size="sm" variant="secondary" icon={<MessageCircle size={16} />}>
+            Chat
+          </ButtonLink>
+        )}
         {ev.closedAt ? (
           <Button size="sm" variant="secondary" icon={<LockOpen size={16} />} onClick={() => onAction('reopen')}>
             Reopen
@@ -375,6 +380,7 @@ const LOG_VERB: Record<AdminAction['action'], string> = {
   delete_event: 'deleted',
   grant_admin: 'made an admin:',
   revoke_admin: 'removed admin from',
+  delete_message: 'removed a chat message in',
 };
 
 const LOG_ICON: Record<AdminAction['action'], ReactNode> = {
@@ -383,6 +389,7 @@ const LOG_ICON: Record<AdminAction['action'], ReactNode> = {
   delete_event: <Ban size={16} />,
   grant_admin: <ShieldPlus size={16} />,
   revoke_admin: <ShieldOff size={16} />,
+  delete_message: <MessageSquareX size={16} />,
 };
 
 function LogTab() {

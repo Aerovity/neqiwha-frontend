@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router';
 import {
-  ArrowLeft, CalendarClock, Check, ExternalLink, Lock, LockOpen, MapPin, Navigation, Share2, ShieldCheck, Trash2, Users,
+  ArrowLeft, CalendarClock, Check, ExternalLink, Lock, LockOpen, MapPin, MessageCircle, Navigation, Share2, ShieldCheck, Trash2, Users,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
@@ -9,6 +9,7 @@ import {
   ParticipantStack, Sheet, Skeleton, StatusChip, UserName,
 } from '../components';
 import { ApiError, errorMessage } from '../lib/api';
+import { chatAvailable } from '../lib/chat';
 import { formatDate, formatMeetTime, plural } from '../lib/format';
 import { directionsUrl, formatDistance, getPosition, haversineKm, lastKnownPosition, type LatLng } from '../lib/geo';
 import { useGoBack } from '../lib/history';
@@ -169,6 +170,12 @@ export function SpotScreen() {
 
         {v?.hasJoined && v.isCheckedIn && !v.isOrganizer && spot.status !== 'cleaned' && (
           <Notice tone="success" title="You're checked in ✓ — rewards land when the spot is verified." />
+        )}
+
+        {chatAvailable(spot, !!me.data?.isAdmin) && (
+          <ButtonLink to={`/spots/${spot.id}/chat`} variant="secondary" size="lg" full icon={<MessageCircle size={20} />}>
+            Crew chat
+          </ButtonLink>
         )}
 
         {me.data?.isAdmin && <Moderation spot={spot} />}

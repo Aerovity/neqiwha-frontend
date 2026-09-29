@@ -15,6 +15,7 @@ import { RanksScreen } from './screens/RanksScreen';
 import { LeaderboardScreen } from './screens/LeaderboardScreen';
 import { SpotScreen } from './screens/SpotScreen';
 import { CreateSpotScreen } from './screens/CreateSpotScreen';
+import { ChatScreen } from './screens/ChatScreen';
 import { CheckinScreen } from './screens/CheckinScreen';
 import { FinishScreen } from './screens/FinishScreen';
 import { MyQrScreen } from './screens/MyQrScreen';
@@ -52,6 +53,7 @@ export function App() {
                 <Route path="/onboarding" element={<OnboardingScreen />} />
                 <Route path="/spots/new" element={<CreateSpotScreen />} />
                 <Route path="/spots/:id/checkin" element={<CheckinScreen />} />
+                <Route path="/spots/:id/chat" element={<ChatScreen />} />
                 <Route path="/spots/:id/finish" element={<FinishScreen />} />
                 <Route path="/me/qr" element={<MyQrScreen />} />
                 <Route path="/profile" element={<ProfileScreen />} />

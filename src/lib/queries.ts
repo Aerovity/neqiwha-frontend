@@ -1,9 +1,11 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query';
 import { api, ApiError } from './api';
 import type {
   AdminAction, AdminEvent, AdminStats, AdminUser, AppConfig, CheckinResult, CompleteResult, EventDetail, EventPin, HistoryEntry, LeaderboardResponse, Me,
   PhotoAnalysis, ShopItem, Voucher,
 } from '../shared/types';
+import type { ChatMessage, ChatPage } from '../shared/chat';
+import { mergeChat, type ChatView } from './chat';
 
 // ---------- queries ----------
 
@@ -55,6 +57,36 @@ export const useMyEvents = () =>
     queryKey: ['my-events'],
     queryFn: () => api<{ organized: EventPin[]; joined: EventPin[] }>('/me/events'),
   });
+
+/** Answers that won't change by retrying: logged out, left the spot, spot gone, solo spot, chat closed. */
+export const isChatGone = (err: unknown) => err instanceof ApiError && [401, 403, 404, 409, 410].includes(err.status);
+
+/**
+ * One poll: asks for what changed since the cached cursor, then merges into the cache as it is *now*, so a message
+ * sent or deleted while the request was in flight isn't overwritten. When the chat's state changes (cleaned, closed,
+ * reopened), unchanged messages' `canDelete` may be stale too, so it reloads the full page once.
+ */
+export async function fetchChat(qc: QueryClient, id: string): Promise<ChatView> {
+  const key = ['chat', id];
+  const url = `/events/${id}/messages`;
+  const start = qc.getQueryData<ChatView>(key);
+  let page = await api<ChatPage>(start ? `${url}?since=${encodeURIComponent(start.cursor)}` : url);
+  if (start && page.state !== start.state) page = await api<ChatPage>(url);
+  return mergeChat(qc.getQueryData<ChatView>(key), page);
+}
+
+// Polls every 3 s for messages created or deleted since the last cursor, merging them into the cached view.
+// Stops once the chat is gone for this viewer; a network blip only skips a beat.
+export const useChat = (id: string | undefined) => {
+  const qc = useQueryClient();
+  return useQuery({
+    queryKey: ['chat', id],
+    queryFn: () => fetchChat(qc, id!),
+    enabled: !!id,
+    retry: (count, err) => !isChatGone(err) && count < 1,
+    refetchInterval: q => (isChatGone(q.state.error) ? false : 3000),
+  });
+};
 
 // ---------- mutations ----------
 
@@ -251,5 +283,30 @@ export function useSetAdmin() {
     mutationFn: ({ id, isAdmin }: { id: string; isAdmin: boolean }) =>
       api<{ ok: true }>(`/admin/users/${id}/admin`, { method: 'POST', json: { isAdmin } }),
     onSuccess: () => qc.invalidateQueries({ queryKey: ['admin'] }),
+  });
+}
+
+// ---------- chat ----------
+
+/** Puts a message the server just returned into the cached chat without waiting for the next poll. */
+function useMergeMessage(id: string) {
+  const qc = useQueryClient();
+  return (msg: ChatMessage) =>
+    qc.setQueryData<ChatView>(['chat', id], v => v && mergeChat(v, { ...v, messages: [msg] }));
+}
+
+export function useSendMessage(id: string) {
+  const merge = useMergeMessage(id);
+  return useMutation({
+    mutationFn: (body: string) => api<ChatMessage>(`/events/${id}/messages`, { method: 'POST', json: { body } }),
+    onSuccess: merge,
+  });
+}
+
+export function useDeleteMessage(id: string) {
+  const merge = useMergeMessage(id);
+  return useMutation({
+    mutationFn: (messageId: string) => api<ChatMessage>(`/events/${id}/messages/${messageId}`, { method: 'DELETE' }),
+    onSuccess: merge,
   });
 }
